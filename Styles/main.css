@@ -1,0 +1,26 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body,html {
+  background: #000;
+}
+canvas {
+  background: #7FFF00;
+  image-rendering: pixelated;
+}
+@media screen and (orientation: portrait) {
+  body::before {
+    content: "Please rotate your device";
+    position: fixed;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #000;
+    color: #fff;
+    font-size: 1.5rem;
+    z-index: 9999;
+  }
+}
