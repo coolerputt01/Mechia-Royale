@@ -15,10 +15,9 @@ class Camera{
     const rightEdge = this.x + this.canvasWidth/0.5 - this.marginX;
     const topEdge = this.y + this.marginY;
     const bottomEdge = this.y + this.canvasHeight - this.marginY;
-    console.log(this.canvasHeight)
     
     if (player.x < leftEdge) this.x = player.x - this.marginX;
-    else if (player.x + player.width > rightEdge) {this.x = player.x - this.canvasWidth/0.5 + this.marginX; console.log("An issue here")}
+    else if (player.x + player.width > rightEdge) {this.x = player.x - this.canvasWidth/0.5 + this.marginX;}
     
     if (player.y < topEdge) this.y = player.y - this.marginY;
     else if (player.y + player.height > bottomEdge) this.y = player.y - this.canvasHeight + this.marginY;

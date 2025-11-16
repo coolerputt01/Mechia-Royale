@@ -7,7 +7,7 @@ function getCanvasPos(touchEvent,dc) {
 }
 
 class Controller {
-  constructor(x,y,pad,nub){
+  constructor(x,y,pad,nub,scale = 2){
     this.x = x;
     this.y = y;
     this.pad = pad;
@@ -19,22 +19,22 @@ class Controller {
     this.nubY = this.y;
     this.moveX = 0;
     this.moveY = 0;
+    this.scale = scale;
   }
   
   draw(ct) {
-    const padHalfW = 350 / 2;
-    const padHalfH = 350 / 2;
-    const nubHalfW = 250 / 2;
-    const nubHalfH = 250 / 2;
+    const padHalfW = 350 * this.scale / 2;
+    const padHalfH = 350 * this.scale / 2;
+    const nubHalfW = 250 * this.scale / 2;
+    const nubHalfH = 250 * this.scale / 2;
 
-    ct.drawImage(this.pad, this.x - padHalfW, this.y - padHalfH, 350, 350);
-    ct.drawImage(this.nub, this.nubX - nubHalfW, this.nubY - nubHalfH, 250, 250);
+    ct.drawImage(this.pad, this.x - padHalfW, this.y - padHalfH, 350 * this.scale , 350 * this.scale );
+    ct.drawImage(this.nub, this.nubX - nubHalfW, this.nubY - nubHalfH, 250 * this.scale , 250 * this.scale );
   }
   onTouchStart(touchEvent,dc){
     let pos = getCanvasPos(touchEvent,dc);
     const dx = pos.x - this.x;
     const dy = pos.y - this.y;
-    console.log("Touch at:", pos.x, pos.y, "Pad center:", this.x, this.y);
     if (Math.sqrt(dx * dx + dy * dy) <= this.maxDistance) {
       this.active = true;
       this.touchId = touchEvent.identifier;
