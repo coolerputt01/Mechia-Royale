@@ -1,6 +1,6 @@
 extends KinematicBody2D
 
-export var speed := 100;
+export var speed := 200;
 export var acceleration := 0.7;
 
 var direction := Vector2.ZERO;
@@ -11,12 +11,13 @@ onready var label := $Control/StatesLabel;
 onready var weapon := $Hand/Gun/Sprite;
 #onready var crosshair := $Crosshair;
 var weapon_offset_x := 3;
-var bullet_offet := Vector2(13,13);
+var bullet_offset := Vector2(13,13);
+var recoil_strength := 3;
 
 var facingRight = true;
 
 var shakeTimer := 0.0;
-var shakeTime := 3.0;
+var shakeTime := 0.1;
 var delt;
 var isMoving = true;
 
@@ -59,6 +60,16 @@ func _physics_process(delta: float) -> void:
 	follow_mouse();
 	update_flip();
 
+func _process(delta: float) -> void:
+	if shakeTimer > 0:
+		shakeTimer -= delta;
+		var rx = randf() * 3;
+		var ry = randf() * 5;
+		$Camera2D.offset = Vector2(rx,ry);
+	else:
+		$Camera2D.offset = Vector2.ZERO;
+
+
 func follow_mouse():
 	$Hand.look_at(get_global_mouse_position());
 
@@ -74,19 +85,20 @@ func update_flip():
 
 
 func shakeScreen():
-	shakeTimer += delt;
-	if shakeTimer <= shakeTime:
-		var rx = randf() * 5 + 1;
-		var ry = randf() * 5 + 1;
-		$Camera2D.offset = Vector2(rx,ry);
-	else:
-		shakeTime = 0.0;
-		$Camera2D.offset = Vector2.ZERO;
+	shakeTimer = shakeTime;
+
+func setPosition(vec2):
+	global_position = vec2;
+
+func applyRecoil(direction: Vector2):
+	var recoil = -direction * recoil_strength;
+	global_position += recoil;
 
 func shoot():
 	var bullet = bullet_scene.instance();
 	get_parent().add_child(bullet);
-	shakeScreen();
-	bullet.global_position = weapon.global_position + bullet_offet;
-	bullet.direction = get_global_mouse_position() - bullet.global_position;
+	bullet.global_position = $Hand/Gun/Muzzle.global_position;
+	bullet.direction = (get_global_mouse_position() - bullet.global_position).normalized();
 	bullet.rotation = bullet.direction.angle();
+	applyRecoil(bullet.direction);
+	shakeScreen();

@@ -1,150 +1,137 @@
 extends TileMap
 
-enum BIOMES {
-	GREEN,
-	BLUE,
-	PINK
+enum GRID_SPACE {
+	EMPTY,
+	FLOOR,
+	WALL
 }
-
-var tileIds := {
-	BIOMES.BLUE : [0,1,2,3,4,5,6,7,8],
-	BIOMES.GREEN : [13,14,15,16,17,18,19,20,21],
-	BIOMES.PINK : [22,23,24,25,26,27,28,29,30],
-	"DIRT" : [9,10,11,12]
+var TILE_ID = {
+	"FLOOR" : 1,
+	"WALL" : 0,
 }
+var gridMap = [];
+export var map_width := 15;
+export var map_height := 15;
+var walkers := [];
 
-export var map_width := 25;
-export var map_height := 25
-var map_data = [];
-const DIRT = -1
+var chanceWalkerChangeDir := 0.7;
+var chanceWalkerSpawn := 0.1;
+var chanceToDestroy := 0.05;
+var maxWalkers := 10;
+var percentToFill := 0.2;
 
-func initialize_map():
-	clear();
-	map_data.clear()
-	for y in range(map_height):
-		map_data.append([])
-		for x in range(map_width):
-			map_data[y].append(null)
+func _ready() -> void:
+	randomize();
+	setupMap();
+	createFloorTiles();
+	createWallTiles();
+	spawnLevel();
 
-func _ready():
-	randomize()
-	initialize_map()
-	generateBiomes()
-	generatePaths()
-	placeTiles();
+func randomDirection():
+	var choice = randi() % 4;
+	match(choice):
+		0:
+			return Vector2.DOWN;
+		1:
+			return Vector2.LEFT;
+		2:
+			return Vector2.UP;
+		_:
+			return Vector2.RIGHT;
 
-
-func generateBiomes():
-	for y in range(map_height):
-		for x in range(map_width):
-			if x < map_width/3:
-				map_data[y][x] = BIOMES.GREEN;
-			elif x < 2 * map_width / 3:
-				map_data[y][x] = BIOMES.PINK;
-			else:
-				map_data[y][x] = BIOMES.BLUE;
-
-func generatePaths():
-	var y = int(map_height / 2)
-	for x in range(map_width):
-		map_data[y][x] = DIRT;
-		if randi() % 2 == 0:
-			y += int(rand_range(-1,1))
-			y = clamp(y, 0, map_height-1);
-
-func getBiomeId(x,y):
-	var biome = map_data[y][x];
-	var top = null;
-	if y > 0:
-		top = map_data[y-1][x]
-	var bottom = null
-	if y < map_height-1:
-		bottom = map_data[y+1][x]
-	var left = null
-	if x > 0:
-		left = map_data[y][x-1]
-	var right = null
-	if x < map_width-1:
-		right = map_data[y][x+1]
-
-	var neighbors = {
-		"top": top,
-		"bottom": bottom,
-		"left": left,
-		"right": right
-	}
-	var idx = 4;
-	if neighbors["top"] != biome and neighbors["left"] != biome:
-		idx = 0;
-	elif neighbors["top"] != biome and neighbors["right"] != biome:
-		idx = 2;
-	elif neighbors["bottom"] != biome and neighbors["left"] != biome:
-		idx = 6;
-	elif neighbors["bottom"] != biome and neighbors["right"] != biome:
-		idx = 8;
-	elif neighbors["top"] != biome:
-		idx = 1;
-	elif neighbors["bottom"] != biome:
-		idx = 7;
-	elif neighbors["left"] != biome:
-		idx = 3;
-	elif neighbors["right"] != biome:
-		idx = 5;
-
-	return tileIds[biome][idx]
-
-
-func get_dirt_tile_id(x, y):
-	var top = null
-	if y > 0:
-		top = map_data[y-1][x]
-
-	var bottom = null
-	if y < map_height - 1:
-		bottom = map_data[y+1][x]
-
-	var left = null
-	if x > 0:
-		left = map_data[y][x-1]
-
-	var right = null
-	if x < map_width - 1:
-		right = map_data[y][x+1]
-
-	# Get biome of this tile
-	var biome = map_data[y][x]
-	if biome == DIRT:
-		# If the tile itself is dirt, pick biome from nearby tiles (default to GREEN)
-		if y > 0 and map_data[y-1][x] != DIRT:
-			biome = map_data[y-1][x]
-		elif x > 0 and map_data[y][x-1] != DIRT:
-			biome = map_data[y][x-1]
-		else:
-			biome = BIOMES.GREEN
-
-	var horizontal = (left == DIRT or right == DIRT)
-	var vertical = (top == DIRT or bottom == DIRT)
-	var variant = 0
-
-	if horizontal and vertical:
-		variant = 3
-	elif horizontal:
-		variant = 0
-	elif vertical:
-		variant = 1
-	else:
-		variant = 2
-
-	return tileIds["DIRT"][variant]
-
-
-func placeTiles():
+func numberOfFloors():
+	var count = 0;
 	for y in range(map_height):
 		for x in range(map_width):
-			var tile_type = map_data[y][x];
-			var tile_id = 0
-			if tile_type == DIRT:
-				tile_id = get_dirt_tile_id(x, y)
-			else:
-				tile_id = getBiomeId(x, y)
-			set_cell(x, y, tile_id);
+			if gridMap[y][x] == GRID_SPACE.FLOOR:
+				count += 1;
+	return count;
+
+func setupMap():
+	walkers.clear();
+	gridMap.clear();
+	#clear();
+	for y in range(map_height):
+		gridMap.append([]);
+		for x in range(map_width):
+			gridMap[y].append(GRID_SPACE.EMPTY);
+
+	walkers.append({
+		"pos": Vector2(int(map_width/2),int(map_height/2)),
+		"dir": randomDirection(),
+		});
+
+func createFloorTiles():
+	var iterations = 60;
+	for i in range(iterations):
+		for walker in walkers:
+			gridMap[int(walker["pos"].y)][int(walker["pos"].x)] = GRID_SPACE.FLOOR;
+
+		var numberOfChecks = 5;
+		for j in range(numberOfChecks):
+			if randf() < chanceToDestroy and walkers.size() > 1:
+				walkers.pop_at(randi() % walkers.size())
+				break;
+
+		for walker in walkers:
+			if randf() < chanceWalkerChangeDir:
+				walker["dir"] = randomDirection();
+
+		numberOfChecks = walkers.size();
+		for l in range(numberOfChecks):
+			if randf() < chanceWalkerSpawn and walkers.size() < maxWalkers:
+				walkers.append({
+					"pos": walkers[l]["pos"],
+					"dir": randomDirection(),
+				});
+
+		for walker in walkers:
+			walker["pos"] += walker["dir"];
+
+		for walker in walkers:
+			walker["pos"].x = clamp(walker["pos"].x,1,map_width - 2);
+			walker["pos"].y = clamp(walker["pos"].y,1,map_height - 2);
+
+		if float(numberOfFloors())/ float(map_width * map_height) > percentToFill:
+			break;
+
+func createWallTiles():
+	for y in range(map_height):
+		for x in range(map_height):
+			if gridMap[y][x] == GRID_SPACE.FLOOR:
+				if gridMap[y][x+1] == GRID_SPACE.EMPTY:
+					gridMap[y][x+1] = GRID_SPACE.WALL;
+				if gridMap[y][x-1] == GRID_SPACE.EMPTY:
+					gridMap[y][x-1] = GRID_SPACE.WALL;
+				if gridMap[y+1][x] == GRID_SPACE.EMPTY:
+					gridMap[y+1][x] = GRID_SPACE.WALL
+				if gridMap[y-1][x] == GRID_SPACE.EMPTY:
+					gridMap[y-1][x] = GRID_SPACE.WALL
+
+func spawn(x,y,tileID):
+	set_cell(x,y,tileID);
+
+func getRandomPos():
+	var floor_data := [];
+	for y in map_height:
+		for x in map_width:
+			if gridMap[y][x] == GRID_SPACE.FLOOR:
+				floor_data.append(Vector2(x,y));
+
+	if floor_data.empty():
+		return to_global(map_to_world(walkers.front()["pos"]) + cell_size / 2)
+		print("hi")
+
+	var tile = floor_data[randi() % floor_data.size()];
+	var world_mapped = map_to_world(tile);
+	world_mapped += cell_size / 2;
+	return to_global(world_mapped);
+
+func spawnLevel():
+	for y in range(map_height):
+		for x in range(map_width):
+			match(gridMap[y][x]):
+				GRID_SPACE.FLOOR:
+					spawn(x,y,TILE_ID["FLOOR"]);
+				GRID_SPACE.WALL:
+					spawn(x,y,TILE_ID["WALL"])
