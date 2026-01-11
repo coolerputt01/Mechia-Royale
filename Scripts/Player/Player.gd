@@ -9,6 +9,9 @@ var velocity := Vector2.ZERO;
 onready var bullet_scene := preload("res://Props/Bullet/Bullet.tscn");
 onready var label := $Control/StatesLabel;
 onready var weapon := $Hand/Gun/Sprite;
+onready var sfx_shoot := preload("res://Assets/Music/SFX/shoot-6-81136.mp3")
+onready var sfx_run := preload("res://Assets/Music/SFX/st2-footstep-sfx-323055.mp3")
+onready var sfx := $sfx;
 #onready var crosshair := $Crosshair;
 var weapon_offset_x := 3;
 var bullet_offset := Vector2(13,13);
@@ -21,12 +24,24 @@ var shakeTime := 0.1;
 var delt;
 var isMoving = true;
 
+func play_sfx(stream):
+	match(stream):
+		"run":
+			if sfx.stream != sfx_run or not sfx.playing:
+					sfx.stream = sfx_run
+					sfx.play();
+		"shoot":
+			sfx.stream = sfx_shoot;
+			sfx.play();
+			return;
+
 func _input(event) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		get_tree().quit()
 
 	if event is InputEventMouseButton:
 		shoot();
+		play_sfx("shoot");
 
 func setStateLabel(txt : String):
 	$Control/StatesLabel.bbcode_text = txt;
@@ -46,6 +61,7 @@ func handleMovement(delta):
 
 	if new_direction != Vector2.ZERO:
 		new_direction = new_direction.normalized();
+		play_sfx("run");
 
 	direction = new_direction;
 
@@ -78,8 +94,10 @@ func update_flip():
 	#weapon.flip_h = not facingRight
 	if facingRight:
 		$Hand.position.x = weapon_offset_x
+		weapon.flip_v = false;
 	else:
 		$Hand.position.x = -weapon_offset_x
+		weapon.flip_v = true;
 
 	$animation.flip_h = !facingRight;
 
@@ -92,7 +110,7 @@ func setPosition(vec2):
 
 func applyRecoil(direction: Vector2):
 	var recoil = -direction * recoil_strength;
-	global_position += recoil;
+	move_and_collide(recoil);
 
 func shoot():
 	var bullet = bullet_scene.instance();

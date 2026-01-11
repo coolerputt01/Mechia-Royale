@@ -1,0 +1,124 @@
+[gd_scene load_steps=25 format=2]
+
+[ext_resource path="res://Assets/Environment/GunPlaceHolder.png" type="Texture" id=1]
+[ext_resource path="res://Assets/Environment/GunPlaceHolder2.png" type="Texture" id=2]
+[ext_resource path="res://Assets/Environment/GunPlaceHolder3.png" type="Texture" id=3]
+
+[sub_resource type="AtlasTexture" id=11]
+atlas = ExtResource( 1 )
+region = Rect2( 0, 0, 36, 32 )
+
+[sub_resource type="AtlasTexture" id=12]
+atlas = ExtResource( 1 )
+region = Rect2( 36, 0, 36, 32 )
+
+[sub_resource type="AtlasTexture" id=13]
+atlas = ExtResource( 1 )
+region = Rect2( 72, 0, 36, 32 )
+
+[sub_resource type="AtlasTexture" id=14]
+atlas = ExtResource( 1 )
+region = Rect2( 108, 0, 36, 32 )
+
+[sub_resource type="AtlasTexture" id=15]
+atlas = ExtResource( 1 )
+region = Rect2( 144, 0, 36, 32 )
+
+[sub_resource type="AtlasTexture" id=16]
+atlas = ExtResource( 1 )
+region = Rect2( 180, 0, 36, 32 )
+
+[sub_resource type="SpriteFrames" id=17]
+animations = [ {
+"frames": [ SubResource( 11 ), SubResource( 12 ), SubResource( 13 ), SubResource( 14 ), SubResource( 15 ), SubResource( 16 ) ],
+"loop": true,
+"name": "IDLE",
+"speed": 5.0
+} ]
+
+[sub_resource type="AtlasTexture" id=18]
+atlas = ExtResource( 2 )
+region = Rect2( 0, 0, 36, 32 )
+
+[sub_resource type="AtlasTexture" id=19]
+atlas = ExtResource( 2 )
+region = Rect2( 36, 0, 36, 32 )
+
+[sub_resource type="AtlasTexture" id=20]
+atlas = ExtResource( 2 )
+region = Rect2( 72, 0, 36, 32 )
+
+[sub_resource type="AtlasTexture" id=21]
+atlas = ExtResource( 2 )
+region = Rect2( 108, 0, 36, 32 )
+
+[sub_resource type="AtlasTexture" id=22]
+atlas = ExtResource( 2 )
+region = Rect2( 144, 0, 36, 32 )
+
+[sub_resource type="AtlasTexture" id=23]
+atlas = ExtResource( 2 )
+region = Rect2( 180, 0, 36, 32 )
+
+[sub_resource type="SpriteFrames" id=24]
+animations = [ {
+"frames": [ SubResource( 18 ), SubResource( 19 ), SubResource( 20 ), SubResource( 21 ), SubResource( 22 ), SubResource( 23 ) ],
+"loop": true,
+"name": "IDLE",
+"speed": 5.0
+} ]
+
+[sub_resource type="AtlasTexture" id=25]
+atlas = ExtResource( 3 )
+region = Rect2( 0, 0, 36, 32 )
+
+[sub_resource type="AtlasTexture" id=26]
+atlas = ExtResource( 3 )
+region = Rect2( 36, 0, 36, 32 )
+
+[sub_resource type="AtlasTexture" id=27]
+atlas = ExtResource( 3 )
+region = Rect2( 72, 0, 36, 32 )
+
+[sub_resource type="AtlasTexture" id=28]
+atlas = ExtResource( 3 )
+region = Rect2( 108, 0, 36, 32 )
+
+[sub_resource type="AtlasTexture" id=29]
+atlas = ExtResource( 3 )
+region = Rect2( 144, 0, 36, 32 )
+
+[sub_resource type="AtlasTexture" id=30]
+atlas = ExtResource( 3 )
+region = Rect2( 180, 0, 36, 32 )
+
+[sub_resource type="SpriteFrames" id=31]
+animations = [ {
+"frames": [ SubResource( 25 ), SubResource( 26 ), SubResource( 27 ), SubResource( 28 ), SubResource( 29 ), SubResource( 30 ) ],
+"loop": true,
+"name": "IDLE",
+"speed": 5.0
+} ]
+
+[node name="Guns" type="Node2D"]
+
+[node name="gun" type="AnimatedSprite" parent="."]
+position = Vector2( 1, -6 )
+frames = SubResource( 17 )
+animation = "IDLE"
+frame = 3
+playing = true
+
+[node name="gun2" type="AnimatedSprite" parent="."]
+position = Vector2( 43, -6 )
+frames = SubResource( 24 )
+animation = "IDLE"
+frame = 4
+playing = true
+
+[node name="gun3" type="AnimatedSprite" parent="."]
+position = Vector2( 88, -6 )
+frames = SubResource( 31 )
+animation = "IDLE"
+frame = 3
+playing = true

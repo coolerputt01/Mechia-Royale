@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/power-hub-ost-337760.mp3-108cf45890fccccc3911040283bd17ec.mp3str"
+
+[deps]
+
+source_file="res://Assets/Music/Songs/power-hub-ost-337760.mp3"
+dest_files=[ "res://.import/power-hub-ost-337760.mp3-108cf45890fccccc3911040283bd17ec.mp3str" ]
+
+[params]
+
+loop=true
+loop_offset=0

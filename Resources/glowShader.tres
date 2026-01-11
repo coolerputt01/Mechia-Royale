@@ -1,0 +1,30 @@
+[gd_resource type="Shader" format=2]
+
+[resource]
+code = "shader_type canvas_item;
+
+uniform vec4 color1: hint_color;
+uniform vec4 color2 : hint_color;
+uniform float threshold = 0.4;
+uniform float intensity = 1.0;
+uniform float opacity = 0.3;
+uniform vec4 glow_color : hint_color;
+
+void fragment(){
+	vec4 pixel_color = texture(TEXTURE,UV);
+	
+	if(pixel_color.a < 0.01){
+		COLOR = pixel_color;
+	}
+	
+	float d1 =  length(pixel_color.rgb - color1.rgb);
+	float d2 = length(pixel_color.rgb - color2.rgb);
+	
+	float glow_factor = 1.0 - min(smoothstep(0.0,threshold,d1),smoothstep(0.0,threshold,d2));
+	vec4 modified_glow_color = glow_color;
+	modified_glow_color.a *= glow_factor * opacity * intensity;
+	
+	COLOR = mix(pixel_color,modified_glow_color,modified_glow_color.a);
+	COLOR.a = pixel_color.a;
+	
+}"

@@ -112,6 +112,7 @@ func spawn(x,y,tileID):
 	set_cell(x,y,tileID);
 
 func getRandomPos():
+	randomize();
 	var floor_data := [];
 	for y in map_height:
 		for x in map_width:
